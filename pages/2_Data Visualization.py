@@ -165,8 +165,8 @@ except:
 @st.cache_data
 def load_data():
     """Tải, gộp, và chuẩn bị dữ liệu thô cho EDA."""
-    fake_path = "C:/Users/phath/OneDrive/Documents/GitHub/statistics-programming/group_project_ds/data/Fake.csv"
-    true_path = "C:/Users/phath/OneDrive/Documents/GitHub/statistics-programming/group_project_ds/data/True.csv"
+    fake_path = "https://raw.githubusercontent.com/tphathuin1802/fake-news-advanced/refs/heads/main/data/Fake.csv"
+    true_path = "https://raw.githubusercontent.com/tphathuin1802/fake-news-advanced/refs/heads/main/data/True.csv"
 
     try:
         fake_df = pd.read_csv(fake_path)
