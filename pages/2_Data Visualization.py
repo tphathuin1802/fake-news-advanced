@@ -1,25 +1,28 @@
+import matplotlib
+
+matplotlib.use("Agg")  # ✅ Fix backend crash khi chạy WordCloud trong Streamlit
+
+import io
+
 import matplotlib.pyplot as plt
 import nltk
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 from nltk.corpus import stopwords
+from PIL import Image
 from sklearn.feature_extraction.text import CountVectorizer
 from wordcloud import WordCloud
 
-# --- PAGE CONFIG ---
 st.set_page_config(page_title="Data Visualization & Insights", layout="wide")
 
-# --- CSS TÙY CHỈNH ---
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-
     html, body, [class*="st-"] {
         font-family: 'JetBrains Mono', monospace;
     }
-
     .main-title {
         text-align: center;
         font-size: 2.8rem;
@@ -28,7 +31,6 @@ st.markdown(
         margin-top: 0.5em;
         margin-bottom: 0.5em;
     }
-
     .section-header {
         font-size: 1.6rem;
         font-weight: 700;
@@ -37,7 +39,6 @@ st.markdown(
         padding-left: 12px;
         margin-top: 2em;
     }
-
     .highlight {
         background-color: #f8fbff;
         border-left: 4px solid #1E90FF;
@@ -46,7 +47,6 @@ st.markdown(
         margin-bottom: 1.2em;
         line-height: 1.6;
     }
-
     .footer-note {
         text-align: center;
         font-style: italic;
@@ -58,20 +58,17 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- TITLE ---
 st.markdown(
     "<div class='main-title'>Data Visualization & Insights</div>",
     unsafe_allow_html=True,
 )
 
-# --- BANNER ---
 st.image(
     "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1600&q=80",
     use_container_width=True,
     caption="Data Analytics & Visualization Overview",
 )
 
-# --- SECTION 4: DATA DISTRIBUTION ---
 st.markdown(
     "<div class='section-header'>4. Data Distribution Overview</div>",
     unsafe_allow_html=True,
@@ -82,23 +79,19 @@ st.markdown(
 The dataset consists of two major categories:
 - **Fake News:** 23,481 records  
 - **True News:** 21,417 records  
-
 The dataset is relatively balanced, ensuring fairness in model training and evaluation.
 </div>
 """,
     unsafe_allow_html=True,
 )
 
-# Ví dụ biểu đồ tỷ lệ tin thật - tin giả
 labels = ["Fake News", "True News"]
 sizes = [23481, 21417]
-
 fig, ax = plt.subplots()
 ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
 ax.axis("equal")
 st.pyplot(fig)
 
-# --- SECTION 5: TEXT ANALYSIS ---
 st.markdown(
     "<div class='section-header'>5. Text Analysis & Word Frequency</div>",
     unsafe_allow_html=True,
@@ -114,21 +107,17 @@ while **True News** tends to use neutral and factual language.
     unsafe_allow_html=True,
 )
 
-# (Bạn có thể thay thế phần dưới bằng WordCloud thực tế)
 fake_words = ["breaking", "trump", "hillary", "election", "fake"]
 true_words = ["said", "reuters", "report", "government", "official"]
 
 col1, col2 = st.columns(2)
-
 with col1:
     st.subheader("Most Common Words — Fake News")
     st.bar_chart(pd.Series(fake_words).value_counts())
-
 with col2:
     st.subheader("Most Common Words — True News")
     st.bar_chart(pd.Series(true_words).value_counts())
 
-# --- SECTION: SENTIMENT INSIGHTS ---
 st.markdown(
     "<div class='section-header'>5.1 Sentiment Insights</div>", unsafe_allow_html=True
 )
@@ -142,16 +131,11 @@ while True News maintains **neutral tone** due to journalistic standards.
     unsafe_allow_html=True,
 )
 
-# --- FOOTER ---
 st.markdown(
     "<div class='footer-note'>📊 Visualizing the data provides deeper intuition for model development and feature engineering.</div>",
     unsafe_allow_html=True,
 )
 
-
-# ==============================
-# 🧠 LOAD STOPWORDS
-# ==============================
 try:
     stop_words_list = stopwords.words("english")
 except:
@@ -159,24 +143,12 @@ except:
     stop_words_list = stopwords.words("english")
 
 
-# ==============================
-# 📦 LOAD DATA FUNCTION
-# ==============================
 @st.cache_data
 def load_data():
-    """Tải, gộp, và chuẩn bị dữ liệu thô cho EDA."""
     fake_path = "https://raw.githubusercontent.com/tphathuin1802/fake-news-advanced/refs/heads/main/data/Fake.csv"
     true_path = "https://raw.githubusercontent.com/tphathuin1802/fake-news-advanced/refs/heads/main/data/True.csv"
-
-    try:
-        fake_df = pd.read_csv(fake_path)
-        true_df = pd.read_csv(true_path)
-    except FileNotFoundError:
-        st.error(
-            f"❌ Error: Data files not found at '{fake_path}' or '{true_path}'. Please check the paths in the code."
-        )
-        return None, None
-
+    fake_df = pd.read_csv(fake_path)
+    true_df = pd.read_csv(true_path)
     fake_df["label"] = 0
     true_df["label"] = 1
     news_df = pd.concat([fake_df, true_df], ignore_index=True)
@@ -185,11 +157,7 @@ def load_data():
     return news_df, news_df.dropna(subset=["text"])
 
 
-# ==============================
-# 📊 PAGE CONTENT
-# ==============================
 st.markdown('<div class="content-box">', unsafe_allow_html=True)
-
 st.title("Data Visualization")
 st.markdown(
     "Explore the dataset through interactive visualizations that help uncover key trends and distributions in Fake vs. True news."
@@ -203,7 +171,6 @@ if df is not None:
         "Let's begin by understanding the overall data composition and text properties."
     )
 
-    # --- Label Distribution ---
     st.subheader("Label Distribution")
     fig1 = px.bar(
         df,
@@ -215,7 +182,6 @@ if df is not None:
     )
     st.plotly_chart(fig1, use_container_width=True)
 
-    # --- Word Count Distribution ---
     st.subheader("Word Count Distribution")
     fig2 = px.histogram(
         df,
@@ -230,7 +196,6 @@ if df is not None:
     fig2.update_traces(opacity=0.7)
     st.plotly_chart(fig2, use_container_width=True)
 
-    # --- Subject Distribution ---
     st.subheader("Subject Distribution")
     fig3 = px.bar(
         df,
@@ -243,9 +208,8 @@ if df is not None:
     )
     st.plotly_chart(fig3, use_container_width=True)
 
-    # --- Word Frequency + Word Cloud ---
     st.subheader("Most Frequent Words & Word Cloud")
-    with st.spinner("🧠 Generating word plots..."):
+    with st.spinner("Generating word plots..."):
         vec = CountVectorizer(stop_words=stop_words_list, max_features=1000)
         dtm = vec.fit_transform(df_clean["text"])
         freq = dtm.sum(axis=0).A1
@@ -263,17 +227,38 @@ if df is not None:
         )
         st.plotly_chart(fig4, use_container_width=True)
 
-        text = " ".join(df_clean["text"])
+        # ✅ Giới hạn sample để tránh crash
+        sample_texts = (
+            df_clean["text"]
+            .dropna()
+            .astype(str)
+            .sample(n=min(3000, len(df_clean)), random_state=42)
+        )
+        text = " ".join(sample_texts)
+
+        # ✅ Sinh WordCloud an toàn
         wc = WordCloud(
             width=800,
             height=400,
             background_color="white",
-            stopwords=stop_words_list,
-            max_words=100,
+            stopwords=set(stop_words_list),
+            max_words=300,
             colormap="Dark2",
+            collocations=False,
+            normalize_plurals=False,
         ).generate(text)
+
+        buf = io.BytesIO()
+        img = wc.to_image()
+        img.save(buf, format="PNG")
         st.image(
-            wc.to_array(), caption="Word Cloud of News Dataset", use_column_width=True
+            Image.open(io.BytesIO(buf.getvalue())),
+            caption="Word Cloud of News Dataset",
+            use_column_width=True,
         )
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("</div>", unsafe_allow_html=True)
