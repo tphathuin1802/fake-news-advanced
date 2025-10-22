@@ -1,9 +1,10 @@
+import requests
 import streamlit as st
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Introduction", layout="wide")
 
-# --- CSS TÙY CHỈNH ---
+# --- CSS TUỲ CHỈNH ---
 st.markdown(
     """
     <style>
@@ -57,12 +58,45 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- BANNER HÌNH ẢNH (Unsplash, chủ đề “AI & News Media”) ---
-st.image(
-    "https://images.unsplash.com/photo-1581091215367-59ab6a3b44c6?auto=format&fit=crop&w=1600&q=80",
-    use_container_width=True,
-    caption="AI and Media Illustration — Understanding Truth in the Digital Age",
-)
+
+# --- BANNER (TỰ ĐỘNG KIỂM TRA NGUỒN HÌNH KHẢ DỤNG) ---
+def get_working_image(urls, timeout=5):
+    for url in urls:
+        try:
+            r = requests.head(url, timeout=timeout)
+            if r.status_code == 200:
+                return url
+        except Exception:
+            continue
+    return None
+
+
+banner_urls = [
+    "https://images.unsplash.com/photo-1590608897129-79da98d159f1?auto=format&fit=crop&w=1600&q=80",
+    "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1600&q=80",
+    "https://images.unsplash.com/photo-1581093588401-22b3031a798f?auto=format&fit=crop&w=1600&q=80",
+]
+
+banner = get_working_image(banner_urls)
+
+if banner:
+    st.image(
+        banner,
+        use_container_width=True,
+        caption="Fake vs True News — Understanding Truth in the Digital Era",
+    )
+else:
+    st.markdown(
+        """
+        <div style="display:flex;align-items:center;justify-content:center;width:100%;height:320px;border-radius:8px;
+                    background:linear-gradient(90deg,#f0f8ff,#eef6ff);box-shadow:0 2px 6px rgba(0,0,0,0.06);margin-bottom:16px;">
+          <p style="font-family: 'JetBrains Mono', monospace; color:#1E90FF; font-size:20px;">
+          [ Banner image unavailable — using placeholder ]
+          </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # --- INTRODUCTION ---
 st.markdown("<div class='section-header'>1. Introduction</div>", unsafe_allow_html=True)
